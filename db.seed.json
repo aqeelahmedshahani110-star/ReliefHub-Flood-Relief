@@ -1,0 +1,564 @@
+{
+ "camps": [
+  {
+   "id": 1,
+   "name": "Dadu Relief Camp A",
+   "district": "Dadu",
+   "capacity": 300,
+   "current_families": 240,
+   "status": "Active"
+  },
+  {
+   "id": 2,
+   "name": "Sukkur Government School Camp",
+   "district": "Sukkur",
+   "capacity": 250,
+   "current_families": 250,
+   "status": "Full"
+  },
+  {
+   "id": 3,
+   "name": "Larkana Stadium Camp",
+   "district": "Larkana",
+   "capacity": 400,
+   "current_families": 180,
+   "status": "Active"
+  },
+  {
+   "id": 4,
+   "name": "Jamshoro Highway Camp",
+   "district": "Jamshoro",
+   "capacity": 200,
+   "current_families": 120,
+   "status": "Active"
+  },
+  {
+   "id": 5,
+   "name": "Hyderabad City Camp",
+   "district": "Hyderabad",
+   "capacity": 350,
+   "current_families": 300,
+   "status": "Active"
+  },
+  {
+   "id": 6,
+   "name": "Sehwan Shelter",
+   "district": "Jamshoro",
+   "capacity": 150,
+   "current_families": 90,
+   "status": "Active"
+  },
+  {
+   "id": 7,
+   "name": "Shikarpur Community Hall",
+   "district": "Shikarpur",
+   "capacity": 180,
+   "current_families": 60,
+   "status": "Active"
+  },
+  {
+   "id": 8,
+   "name": "Thatta Coastal Camp",
+   "district": "Thatta",
+   "capacity": 120,
+   "current_families": 0,
+   "status": "Closed"
+  }
+ ],
+ "inventory": [
+  {
+   "id": 1,
+   "name": "Rice (25kg bag)",
+   "category": "Food",
+   "unit": "bag",
+   "stock": 400,
+   "reorder_level": 100
+  },
+  {
+   "id": 2,
+   "name": "Flour Sacks",
+   "category": "Food",
+   "unit": "bag",
+   "stock": 60,
+   "reorder_level": 80
+  },
+  {
+   "id": 3,
+   "name": "Cooking Oil",
+   "category": "Food",
+   "unit": "litre",
+   "stock": 500,
+   "reorder_level": 150
+  },
+  {
+   "id": 4,
+   "name": "Bottled Water",
+   "category": "Water",
+   "unit": "case",
+   "stock": 800,
+   "reorder_level": 200
+  },
+  {
+   "id": 5,
+   "name": "Water Purification Tablets",
+   "category": "Water",
+   "unit": "box",
+   "stock": 90,
+   "reorder_level": 100
+  },
+  {
+   "id": 6,
+   "name": "ORS Sachets",
+   "category": "Medicine",
+   "unit": "box",
+   "stock": 300,
+   "reorder_level": 100
+  },
+  {
+   "id": 7,
+   "name": "Paracetamol",
+   "category": "Medicine",
+   "unit": "strip",
+   "stock": 1000,
+   "reorder_level": 300
+  },
+  {
+   "id": 8,
+   "name": "Family Tents",
+   "category": "Shelter",
+   "unit": "piece",
+   "stock": 120,
+   "reorder_level": 40
+  },
+  {
+   "id": 9,
+   "name": "Tarpaulin Sheets",
+   "category": "Shelter",
+   "unit": "piece",
+   "stock": 250,
+   "reorder_level": 60
+  },
+  {
+   "id": 10,
+   "name": "Hygiene Kits",
+   "category": "Hygiene",
+   "unit": "kit",
+   "stock": 200,
+   "reorder_level": 50
+  },
+  {
+   "id": 11,
+   "name": "Soap Bars",
+   "category": "Hygiene",
+   "unit": "carton",
+   "stock": 140,
+   "reorder_level": 40
+  },
+  {
+   "id": 12,
+   "name": "Blankets",
+   "category": "Other",
+   "unit": "piece",
+   "stock": 30,
+   "reorder_level": 50
+  }
+ ],
+ "needs": [
+  {
+   "id": 1,
+   "camp_id": 1,
+   "inventory_item_id": 1,
+   "required_quantity": 100,
+   "priority": "High",
+   "fulfilled_quantity": 20
+  },
+  {
+   "id": 2,
+   "camp_id": 1,
+   "inventory_item_id": 4,
+   "required_quantity": 300,
+   "priority": "High",
+   "fulfilled_quantity": 250
+  },
+  {
+   "id": 3,
+   "camp_id": 1,
+   "inventory_item_id": 6,
+   "required_quantity": 150,
+   "priority": "Medium",
+   "fulfilled_quantity": 60
+  },
+  {
+   "id": 4,
+   "camp_id": 2,
+   "inventory_item_id": 2,
+   "required_quantity": 120,
+   "priority": "High",
+   "fulfilled_quantity": 30
+  },
+  {
+   "id": 5,
+   "camp_id": 2,
+   "inventory_item_id": 5,
+   "required_quantity": 100,
+   "priority": "High",
+   "fulfilled_quantity": 90
+  },
+  {
+   "id": 6,
+   "camp_id": 2,
+   "inventory_item_id": 8,
+   "required_quantity": 40,
+   "priority": "Low",
+   "fulfilled_quantity": 40
+  },
+  {
+   "id": 7,
+   "camp_id": 3,
+   "inventory_item_id": 1,
+   "required_quantity": 150,
+   "priority": "High",
+   "fulfilled_quantity": 100
+  },
+  {
+   "id": 8,
+   "camp_id": 3,
+   "inventory_item_id": 3,
+   "required_quantity": 200,
+   "priority": "Medium",
+   "fulfilled_quantity": 50
+  },
+  {
+   "id": 9,
+   "camp_id": 3,
+   "inventory_item_id": 10,
+   "required_quantity": 120,
+   "priority": "Medium",
+   "fulfilled_quantity": 80
+  },
+  {
+   "id": 10,
+   "camp_id": 3,
+   "inventory_item_id": 9,
+   "required_quantity": 100,
+   "priority": "Low",
+   "fulfilled_quantity": 20
+  },
+  {
+   "id": 11,
+   "camp_id": 4,
+   "inventory_item_id": 4,
+   "required_quantity": 200,
+   "priority": "High",
+   "fulfilled_quantity": 60
+  },
+  {
+   "id": 12,
+   "camp_id": 4,
+   "inventory_item_id": 7,
+   "required_quantity": 300,
+   "priority": "Medium",
+   "fulfilled_quantity": 150
+  },
+  {
+   "id": 13,
+   "camp_id": 4,
+   "inventory_item_id": 12,
+   "required_quantity": 80,
+   "priority": "Medium",
+   "fulfilled_quantity": 10
+  },
+  {
+   "id": 14,
+   "camp_id": 5,
+   "inventory_item_id": 2,
+   "required_quantity": 100,
+   "priority": "Medium",
+   "fulfilled_quantity": 70
+  },
+  {
+   "id": 15,
+   "camp_id": 5,
+   "inventory_item_id": 6,
+   "required_quantity": 100,
+   "priority": "High",
+   "fulfilled_quantity": 45
+  },
+  {
+   "id": 16,
+   "camp_id": 5,
+   "inventory_item_id": 11,
+   "required_quantity": 60,
+   "priority": "Low",
+   "fulfilled_quantity": 30
+  },
+  {
+   "id": 17,
+   "camp_id": 6,
+   "inventory_item_id": 8,
+   "required_quantity": 50,
+   "priority": "High",
+   "fulfilled_quantity": 30
+  },
+  {
+   "id": 18,
+   "camp_id": 6,
+   "inventory_item_id": 9,
+   "required_quantity": 80,
+   "priority": "Medium",
+   "fulfilled_quantity": 40
+  },
+  {
+   "id": 19,
+   "camp_id": 7,
+   "inventory_item_id": 10,
+   "required_quantity": 90,
+   "priority": "High",
+   "fulfilled_quantity": 70
+  },
+  {
+   "id": 20,
+   "camp_id": 7,
+   "inventory_item_id": 5,
+   "required_quantity": 60,
+   "priority": "Low",
+   "fulfilled_quantity": 10
+  }
+ ],
+ "dispatches": [
+  {
+   "id": 1,
+   "camp_id": 1,
+   "need_id": 1,
+   "quantity": 30,
+   "status": "Pending"
+  },
+  {
+   "id": 2,
+   "camp_id": 1,
+   "need_id": 3,
+   "quantity": 40,
+   "status": "In Transit"
+  },
+  {
+   "id": 3,
+   "camp_id": 2,
+   "need_id": 4,
+   "quantity": 20,
+   "status": "Pending"
+  },
+  {
+   "id": 4,
+   "camp_id": 3,
+   "need_id": 7,
+   "quantity": 25,
+   "status": "In Transit"
+  },
+  {
+   "id": 5,
+   "camp_id": 3,
+   "need_id": 8,
+   "quantity": 50,
+   "status": "Delivered"
+  },
+  {
+   "id": 6,
+   "camp_id": 4,
+   "need_id": 11,
+   "quantity": 40,
+   "status": "Pending"
+  },
+  {
+   "id": 7,
+   "camp_id": 5,
+   "need_id": 15,
+   "quantity": 20,
+   "status": "Cancelled"
+  },
+  {
+   "id": 8,
+   "camp_id": 6,
+   "need_id": 17,
+   "quantity": 10,
+   "status": "Delivered"
+  },
+  {
+   "id": 9,
+   "camp_id": 7,
+   "need_id": 19,
+   "quantity": 15,
+   "status": "In Transit"
+  },
+  {
+   "id": 10,
+   "camp_id": 3,
+   "need_id": 10,
+   "quantity": 10,
+   "status": "Pending"
+  }
+ ],
+ "donations": [
+  {
+   "id": 1,
+   "type": "Cash",
+   "amount_or_quantity": 500000,
+   "item_id": null,
+   "category": "Food"
+  },
+  {
+   "id": 2,
+   "type": "Cash",
+   "amount_or_quantity": 250000,
+   "item_id": null,
+   "category": "Medicine"
+  },
+  {
+   "id": 3,
+   "type": "Cash",
+   "amount_or_quantity": 150000,
+   "item_id": null,
+   "category": "Shelter"
+  },
+  {
+   "id": 4,
+   "type": "Cash",
+   "amount_or_quantity": 100000,
+   "item_id": null,
+   "category": "Water"
+  },
+  {
+   "id": 5,
+   "type": "Cash",
+   "amount_or_quantity": 75000,
+   "item_id": null,
+   "category": "Other"
+  },
+  {
+   "id": 6,
+   "type": "In-Kind",
+   "amount_or_quantity": 50,
+   "item_id": 1,
+   "category": "Food"
+  },
+  {
+   "id": 7,
+   "type": "In-Kind",
+   "amount_or_quantity": 100,
+   "item_id": 4,
+   "category": "Water"
+  },
+  {
+   "id": 8,
+   "type": "In-Kind",
+   "amount_or_quantity": 40,
+   "item_id": 6,
+   "category": "Medicine"
+  },
+  {
+   "id": 9,
+   "type": "In-Kind",
+   "amount_or_quantity": 20,
+   "item_id": 8,
+   "category": "Shelter"
+  },
+  {
+   "id": 10,
+   "type": "In-Kind",
+   "amount_or_quantity": 30,
+   "item_id": 12,
+   "category": "Other"
+  }
+ ],
+ "volunteers": [
+  {
+   "id": 1,
+   "name": "Ayesha Khan",
+   "skill": "Medical",
+   "camp_id": 1
+  },
+  {
+   "id": 2,
+   "name": "Bilal Shaikh",
+   "skill": "Logistics",
+   "camp_id": 1
+  },
+  {
+   "id": 3,
+   "name": "Chandni Kumari",
+   "skill": "Counselling",
+   "camp_id": 2
+  },
+  {
+   "id": 4,
+   "name": "Danish Memon",
+   "skill": "Driving",
+   "camp_id": 3
+  },
+  {
+   "id": 5,
+   "name": "Eman Fatima",
+   "skill": "Cooking",
+   "camp_id": 3
+  },
+  {
+   "id": 6,
+   "name": "Farhan Soomro",
+   "skill": "Logistics",
+   "camp_id": 4
+  },
+  {
+   "id": 7,
+   "name": "Gulshan Bibi",
+   "skill": "Medical",
+   "camp_id": 5
+  },
+  {
+   "id": 8,
+   "name": "Hamza Abro",
+   "skill": "Driving",
+   "camp_id": 5
+  },
+  {
+   "id": 9,
+   "name": "Iqra Jatoi",
+   "skill": "Cooking",
+   "camp_id": 6
+  },
+  {
+   "id": 10,
+   "name": "Junaid Mirani",
+   "skill": "Counselling",
+   "camp_id": null
+  },
+  {
+   "id": 11,
+   "name": "Kiran Meghwar",
+   "skill": "Medical",
+   "camp_id": null
+  },
+  {
+   "id": 12,
+   "name": "Lubna Panhwar",
+   "skill": "Logistics",
+   "camp_id": 7
+  },
+  {
+   "id": 13,
+   "name": "Mansoor Chandio",
+   "skill": "Driving",
+   "camp_id": null
+  },
+  {
+   "id": 14,
+   "name": "Nida Bhutto",
+   "skill": "Cooking",
+   "camp_id": null
+  },
+  {
+   "id": 15,
+   "name": "Owais Rind",
+   "skill": "Medical",
+   "camp_id": 4
+  }
+ ]
+}

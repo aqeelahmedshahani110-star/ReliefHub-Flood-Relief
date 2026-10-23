@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReliefHub: Flood Relief Coordination Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Chart.js CDN for interactive bar charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-icon">🌊</div>
+        <div>
+          <div class="brand-title">
+            ReliefHub
+            <span class="region-tag">Sindh Flood Response</span>
+          </div>
+          <div class="brand-subtitle">Centralized Disaster Logistics &amp; Needs Tracking</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live API indicator -->
+        <div id="sync-indicator" style="display:flex; align-items:center; gap:0.35rem; margin-right:0.5rem;">
+          🟢 <span style="font-size:0.75rem; color:#86efac;">API Online (Port 3000)</span>
+        </div>
+
+        <!-- Role Switcher (Milestone 1 requirement) -->
+        <div class="role-switcher-box" title="Toggle active role to verify permissions">
+          <button id="role-btn-admin" class="role-btn active" type="button">
+            🛡️ Relief Coordinator
+          </button>
+          <button id="role-btn-vol" class="role-btn" type="button">
+            🦺 Field Volunteer
+          </button>
+        </div>
+
+        <!-- Seed Data Reset Button (Milestone 6 requirement) -->
+        <button id="btn-reset-db" class="btn-seed-reset" type="button" title="Reset all records to pristine Hackathon seed data">
+          🔄 Reset Seed
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Role info banner -->
+  <div style="background: #e2e8f0; border-bottom: 1px solid #cbd5e1; padding: 0.35rem 1.5rem; font-size: 0.78rem; color: #334155;">
+    <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+      <div id="active-role-desc">
+        <span class="badge badge-role-admin">Admin Mode</span> Full permissions: Camp registry, Stock management, Dispatch authorization, Volunteer assignments.
+      </div>
+      <div style="font-size: 0.75rem; color: #64748b;">
+        Flood Response Coordination System &bull; Sindh Humanitarian Operation
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs-bar">
+    <div class="nav-container">
+      <button class="tab-btn active" data-tab="dashboard">
+        📊 Overview &amp; Critical Gaps
+      </button>
+      <button class="tab-btn" data-tab="camps">
+        ⛺ Camps Registry <span class="tab-badge" id="badge-camp-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="needs">
+        📦 Needs &amp; Warehouse <span class="tab-badge" id="badge-needs-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="dispatches">
+        🚚 Dispatches &amp; Logistics <span class="tab-badge" id="badge-dispatch-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="donations">
+        🤝 Donations &amp; Volunteers <span class="tab-badge" id="badge-vol-count">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- ============================================================= -->
+    <!-- TAB 1: DASHBOARD & CRITICAL GAPS (MILESTONE 5)                 -->
+    <!-- ============================================================= -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <!-- 5 Required KPI Cards (Milestone 5) -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Active Camps</span>
+            <span class="kpi-value" id="kpi-active-camps">0</span>
+            <span class="kpi-subtext" id="kpi-active-camps-sub">0 at max capacity</span>
+          </div>
+          <div class="kpi-icon-wrap kpi-icon-blue">⛺</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Families Sheltered</span>
+            <span class="kpi-value" id="kpi-families">0</span>
+            <span class="kpi-subtext" id="kpi-families-sub">Across Sindh districts</span>
+          </div>
+          <div class="kpi-icon-wrap kpi-icon-green">👨‍👩‍👧‍👦</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Overall Fulfilment</span>
+            <span class="kpi-value" id="kpi-fulfilment">0%</span>
+            <span class="kpi-subtext" id="kpi-fulfilment-sub">Needs vs deliveries</span>
+          </div>
+          <div class="kpi-icon-wrap kpi-icon-amber">📈</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Low Stock Items</span>
+            <span class="kpi-value" id="kpi-low-stock">0</span>
+            <span class="kpi-subtext" id="kpi-low-stock-sub">&le; reorder threshold</span>
+          </div>
+          <div class="kpi-icon-wrap kpi-icon-red">⚠️</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Volunteers Deployed</span>
+            <span class="kpi-value" id="kpi-volunteers">0</span>
+            <span class="kpi-subtext" id="kpi-volunteers-sub">Assigned to field camps</span>
+          </div>
+          <div class="kpi-icon-wrap kpi-icon-purple">🤝</div>
+        </div>
+      </div>
+
+      <!-- Fulfilment Bar Chart & Urgent Needs Breakdown -->
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              📊 Need Fulfilment Percentage by Item Category
+            </div>
+            <span style="font-size: 0.75rem; color: #64748b;">Target: 100% Fulfilment</span>
+          </div>
+          <div id="category-chart-container" style="position: relative; height: 260px; width: 100%;">
+            <canvas id="categoryChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              ⚡ Sindh Humanitarian Response Highlights
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: #475569; line-height: 1.6;">
+            <p style="margin-bottom: 0.75rem;">
+              <strong>Priority Focus:</strong> Severe monsoon flooding across upper and lower Sindh has displaced thousands of families into camps in Dadu, Sukkur, Larkana, and Jamshoro.
+            </p>
+            <div style="background: #eff6ff; border-left: 3px solid #2563eb; padding: 0.65rem 0.85rem; border-radius: 4px; margin-bottom: 0.75rem;">
+              <div style="font-weight: 700; color: #1e40af;">Logistics Allocation Rules Enforced:</div>
+              <ul style="margin-left: 1.25rem; font-size: 0.78rem; margin-top: 0.35rem;">
+                <li>Immediate stock reservation prevents phantom deliveries.</li>
+                <li>Over-allocation blocked against remaining unreserved needs.</li>
+                <li>In-transit cancellation immediately restores warehouse inventory.</li>
+              </ul>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-sm btn-primary" onclick="openNewDispatchModal()">+ Create Supply Dispatch</button>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('needs')">Inspect Warehouse</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical Gaps Table (Milestone 5 Requirement) -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title" style="color: #dc2626;">
+              🚨 Critical Gaps: High-Priority Needs Under 40% Fulfilment
+            </div>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+              Ordered by worst gap (ascending fulfilment %). Drill down directly to camp or initiate emergency dispatch.
+            </div>
+          </div>
+          <span class="badge badge-high" id="critical-gaps-count">0 Urgent Gaps</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Camp &amp; District</th>
+                <th>Supply Demand</th>
+                <th>Priority</th>
+                <th>Fulfilment Progress</th>
+                <th>Deficit</th>
+                <th>Warehouse Stock</th>
+                <th>Direct Actions</th>
+              </tr>
+            </thead>
+            <tbody id="critical-gaps-tbody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 2: CAMPS REGISTRY (MILESTONE 1)                           -->
+    <!-- ============================================================= -->
+    <div id="tab-camps" class="tab-panel">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">⛺ Flood Relief Camp Registry</h2>
+          <p class="section-desc">Manage flood-relief camps across Sindh districts, track family capacities and automated occupancy states.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddCampModal()">
+          ➕ Register New Camp
+        </button>
+      </div>
+
+      <!-- Camps Filter Toolbar -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <input type="text" id="search-camps" class="input-search" placeholder="🔍 Search camp name or district...">
+          
+          <select id="filter-camp-district" class="select-filter">
+            <option value="all">All Districts</option>
+          </select>
+
+          <select id="filter-camp-status" class="select-filter">
+            <option value="all">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Full">Full (At Capacity)</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+
+        <div style="font-size: 0.8rem; color: #64748b;">
+          Automated rule: Camps mark as <strong>Full</strong> when capacity is reached.
+        </div>
+      </div>
+
+      <!-- Camps Cards Grid -->
+      <div class="camps-grid" id="camps-container">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 3: CAMP NEEDS & WAREHOUSE (MILESTONE 2)                   -->
+    <!-- ============================================================= -->
+    <div id="tab-needs" class="tab-panel">
+      <!-- Section 1: Camp Needs -->
+      <div style="margin-bottom: 2.5rem;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">📋 Camp Supply Demands &amp; Fulfilment</h2>
+            <p class="section-desc">Track unmet demand per relief camp, linked to central warehouse items with live fulfilment progress.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddNeedModal()">
+            ➕ Add Camp Demand
+          </button>
+        </div>
+
+        <!-- Needs Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <select id="filter-need-camp" class="select-filter">
+              <option value="all">All Camps</option>
+            </select>
+
+            <select id="filter-need-priority" class="select-filter">
+              <option value="all">All Priorities</option>
+              <option value="High">High Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+
+            <select id="filter-need-status" class="select-filter">
+              <option value="all">All Fulfilment States</option>
+              <option value="critical">Critical (&lt; 40% High Priority)</option>
+              <option value="progress">In Progress (&gt; 0% &amp; &lt; 100%)</option>
+              <option value="fulfilled">100% Fulfilled</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Needs Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Relief Camp</th>
+                <th>Supply Item</th>
+                <th>Priority</th>
+                <th>Fulfilment Progress</th>
+                <th>Warehouse Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="needs-table-tbody">
+              <!-- Rendered by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Warehouse Inventory -->
+      <div>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">🏢 Central Warehouse Inventory</h2>
+            <p class="section-desc">Maintain warehouse stocks, manage reorder thresholds, and detect items needing urgent replenishment.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddInventoryModal()">
+            ➕ Add Warehouse Item
+          </button>
+        </div>
+
+        <!-- Inventory Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <select id="filter-inventory-cat" class="select-filter">
+              <option value="all">All Categories</option>
+              <option value="Food">Food</option>
+              <option value="Water">Water</option>
+              <option value="Medicine">Medicine</option>
+              <option value="Shelter">Shelter</option>
+              <option value="Hygiene">Hygiene</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; color: #dc2626; font-weight: 600;">
+              <input type="checkbox" id="filter-inventory-low"> Show Low Stock Items Only (&le; Reorder Level)
+            </label>
+          </div>
+        </div>
+
+        <!-- Warehouse Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>Available Stock</th>
+                <th>Reorder Threshold</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-tbody">
+              <!-- Rendered by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 4: DISPATCHES & LOGISTICS (MILESTONE 3)                   -->
+    <!-- ============================================================= -->
+    <div id="tab-dispatches" class="tab-panel">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🚚 Dispatches &amp; Stock Allocations</h2>
+          <p class="section-desc">Live dispatch pipeline with automated immediate stock reservations and strict anti-over-dispatch rules.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewDispatchModal()">
+          ➕ Create New Dispatch
+        </button>
+      </div>
+
+      <!-- Business Rules Banner -->
+      <div style="background: #ffffff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
+        <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 0.25rem;">Milestone 3 Logistics Guarantees:</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.5rem; font-size: 0.8rem; color: #334155;">
+          <div>🔹 <strong>Stock Reservation:</strong> Stock is reserved immediately upon dispatch creation.</div>
+          <div>🔹 <strong>Stock Ceiling:</strong> Dispatches cannot exceed available warehouse stock.</div>
+          <div>🔹 <strong>Demand Ceiling:</strong> Dispatches cannot exceed remaining unreserved demand.</div>
+          <div>🔹 <strong>Delivered State:</strong> Delivered dispatches automatically increase camp fulfilment.</div>
+          <div>🔹 <strong>Cancellation:</strong> Cancelling undelivered dispatches automatically restores stock.</div>
+        </div>
+      </div>
+
+      <!-- Dispatches Toolbar -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <input type="text" id="search-dispatches" class="input-search" placeholder="🔍 Search dispatch by camp or item...">
+
+          <select id="filter-dispatch-status" class="select-filter">
+            <option value="all">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dispatches Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Dispatch ID</th>
+              <th>Destination Camp</th>
+              <th>Supply Need</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Logistics Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dispatches-table-tbody">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 5: DONATIONS & VOLUNTEERS (MILESTONE 4)                   -->
+    <!-- ============================================================= -->
+    <div id="tab-donations" class="tab-panel">
+      <!-- Section 1: Donations -->
+      <div style="margin-bottom: 2.5rem;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">💵 Incoming Contributions &amp; Donations</h2>
+            <p class="section-desc">Record Cash and In-Kind donations. In-kind donations automatically replenish warehouse inventory.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddDonationModal()">
+            ➕ Record New Donation
+          </button>
+        </div>
+
+        <!-- Donation Metrics -->
+        <div class="donation-summary-grid">
+          <div class="donation-stat-box" style="border-left: 4px solid #16a34a;">
+            <div class="donation-stat-val" id="stat-total-cash">Rs. 0</div>
+            <div class="donation-stat-sub">Total Cash Received</div>
+          </div>
+          <div class="donation-stat-box" style="border-left: 4px solid #0284c7;">
+            <div class="donation-stat-val" id="stat-total-inkind">0 items</div>
+            <div class="donation-stat-sub">Total In-Kind Supplies</div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Container -->
+        <div style="margin-bottom: 1.25rem;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem; text-transform: uppercase;">
+            Totals by Donation Category:
+          </div>
+          <div class="donation-summary-grid" id="donation-category-breakdown">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Donations Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <select id="filter-donation-type" class="select-filter">
+              <option value="all">All Contribution Types</option>
+              <option value="Cash">Cash Only</option>
+              <option value="In-Kind">In-Kind Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Donations Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Donation ID</th>
+                <th>Type</th>
+                <th>Amount / Supplies Received</th>
+                <th>Assigned Category</th>
+              </tr>
+            </thead>
+            <tbody id="donations-table-tbody">
+              <!-- Rendered by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Volunteers -->
+      <div>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">🦺 Volunteer Deployment &amp; Assignments</h2>
+            <p class="section-desc">Register field volunteers, filter by specialized skill, and deploy single assignments (assignment to Closed camps prohibited).</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddVolunteerModal()">
+            ➕ Register Volunteer
+          </button>
+        </div>
+
+        <!-- Volunteers Toolbar -->
+        <div class="toolbar">
+          <div class="filter-group">
+            <input type="text" id="search-volunteers" class="input-search" placeholder="🔍 Search volunteer by name...">
+
+            <select id="filter-volunteer-skill" class="select-filter">
+              <option value="all">All Skills</option>
+              <option value="Medical">🩺 Medical</option>
+              <option value="Logistics">📦 Logistics</option>
+              <option value="Cooking">🍲 Cooking</option>
+              <option value="Driving">🚐 Driving</option>
+              <option value="Counselling">💬 Counselling</option>
+            </select>
+
+            <select id="filter-volunteer-assignment" class="select-filter">
+              <option value="all">All Volunteers</option>
+              <option value="assigned">Deployed to Camp</option>
+              <option value="unassigned">Unassigned (Standby)</option>
+            </select>
+          </div>
+
+          <div style="font-size: 0.8rem; color: #64748b;">
+            Rule: 1 assignment per volunteer &bull; Closed camps disallowed
+          </div>
+        </div>
+
+        <!-- Volunteers Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Volunteer Name</th>
+                <th>Skill</th>
+                <th>Assigned Camp</th>
+                <th>Camp Status</th>
+                <th>Deployment Actions</th>
+              </tr>
+            </thead>
+            <tbody id="volunteers-table-tbody">
+              <!-- Rendered by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================= -->
+  <!-- MODALS                                                        -->
+  <!-- ============================================================= -->
+
+  <!-- Modal: Camp Form -->
+  <div class="modal-overlay" id="modal-camp">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="camp-modal-title">Register Relief Camp</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-camp')">&times;</button>
+      </div>
+      <form id="form-camp">
+        <div class="modal-body">
+          <input type="hidden" id="camp-id-input">
+          
+          <div class="form-group">
+            <label class="form-label">Camp Name *</label>
+            <input type="text" id="camp-name-input" class="form-control" required placeholder="e.g. Dadu High School Shelter">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">District in Sindh *</label>
+            <input type="text" id="camp-district-input" class="form-control" required placeholder="e.g. Dadu, Sukkur, Larkana, Jamshoro">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Max Capacity (Families) *</label>
+              <input type="number" id="camp-capacity-input" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Families *</label>
+              <input type="number" id="camp-families-input" class="form-control" min="0" required>
+            </div>
+          </div>
+
+          <div id="camp-capacity-alert" class="form-alert form-alert-warning" style="display: none;"></div>
+
+          <div class="form-group">
+            <label class="form-label">Operational Status</label>
+            <select id="camp-status-input" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Full">Full</option>
+              <option value="Closed">Closed</option>
+            </select>
+            <div class="form-hint">Note: If current families reach or exceed capacity, status automatically switches to Full.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-camp')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Camp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Camp Need Form -->
+  <div class="modal-overlay" id="modal-need">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="need-modal-title">Camp Supply Demand</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-need')">&times;</button>
+      </div>
+      <form id="form-need">
+        <div class="modal-body">
+          <input type="hidden" id="need-id-input">
+
+          <div class="form-group">
+            <label class="form-label">Relief Camp *</label>
+            <select id="need-camp-input" class="form-control" required></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Linked Warehouse Item *</label>
+            <select id="need-item-input" class="form-control" required></select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Required Quantity *</label>
+              <input type="number" id="need-qty-input" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority Level *</label>
+              <select id="need-priority-input" class="form-control">
+                <option value="High">High Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fulfilled Quantity (to date)</label>
+            <input type="number" id="need-fulfilled-input" class="form-control" min="0" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-need')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Demand</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Inventory Form -->
+  <div class="modal-overlay" id="modal-inventory">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inv-modal-title">Warehouse Inventory Item</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-inventory')">&times;</button>
+      </div>
+      <form id="form-inventory">
+        <div class="modal-body">
+          <input type="hidden" id="inv-id-input">
+
+          <div class="form-group">
+            <label class="form-label">Item Name *</label>
+            <input type="text" id="inv-name-input" class="form-control" required placeholder="e.g. Water Purification Tablets">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="inv-category-input" class="form-control">
+                <option value="Food">Food</option>
+                <option value="Water">Water</option>
+                <option value="Medicine">Medicine</option>
+                <option value="Shelter">Shelter</option>
+                <option value="Hygiene">Hygiene</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Unit of Measure *</label>
+              <input type="text" id="inv-unit-input" class="form-control" required placeholder="bag, carton, strip, piece">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Current Stock *</label>
+              <input type="number" id="inv-stock-input" class="form-control" min="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reorder Level *</label>
+              <input type="number" id="inv-reorder-input" class="form-control" min="0" required>
+              <div class="form-hint">Item is flagged Low Stock when stock &le; this level.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-inventory')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Create Dispatch (Milestone 3 with strict validation) -->
+  <div class="modal-overlay" id="modal-dispatch">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🚚 Create Supply Dispatch &amp; Reserve Stock</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-dispatch')">&times;</button>
+      </div>
+      <form id="form-dispatch">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Destination Relief Camp *</label>
+            <select id="dispatch-camp-select" class="form-control" required></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Camp Need to Supply *</label>
+            <select id="dispatch-need-select" class="form-control" required></select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Dispatch Quantity *</label>
+              <input type="number" id="dispatch-qty-input" class="form-control" min="1" required placeholder="Enter quantity">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Initial Status</label>
+              <select id="dispatch-status-select" class="form-control">
+                <option value="Pending">Pending</option>
+                <option value="In Transit">In Transit</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Real-time Milestone 3 constraint verification feedback -->
+          <div id="dispatch-rule-feedback"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-dispatch')">Cancel</button>
+          <button type="submit" id="btn-confirm-dispatch" class="btn btn-primary" disabled>
+            Reserve Stock &amp; Authorize Dispatch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Record Donation (Milestone 4) -->
+  <div class="modal-overlay" id="modal-donation">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">💵 Record Humanitarian Donation</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-donation')">&times;</button>
+      </div>
+      <form id="form-donation">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Donation Type *</label>
+            <select id="donation-type-input" class="form-control">
+              <option value="Cash">Cash Contribution (PKR)</option>
+              <option value="In-Kind">In-Kind Relief Supplies</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-inkind-item" style="display: none;">
+            <label class="form-label">Supply Item Donated *</label>
+            <select id="donation-item-input" class="form-control"></select>
+          </div>
+
+          <div id="inkind-stock-notice" class="form-alert form-alert-info" style="display: none;">
+            📦 <strong>Immediate Replenishment:</strong> In-kind donations immediately increase the available warehouse stock for this item!
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" id="label-donation-amount">Amount (PKR) *</label>
+              <input type="number" id="donation-amount-input" class="form-control" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Relief Category *</label>
+              <select id="donation-category-input" class="form-control">
+                <option value="Food">Food</option>
+                <option value="Water">Water</option>
+                <option value="Medicine">Medicine</option>
+                <option value="Shelter">Shelter</option>
+                <option value="Hygiene">Hygiene</option>
+                <option value="Other">Other / General</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-donation')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Record Contribution</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Volunteer Registration (Milestone 4) -->
+  <div class="modal-overlay" id="modal-volunteer">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🦺 Register Humanitarian Volunteer</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-volunteer')">&times;</button>
+      </div>
+      <form id="form-volunteer">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="vol-name-input" class="form-control" required placeholder="e.g. Dr. Ayesha Khan">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Primary Skill / Role *</label>
+            <select id="vol-skill-input" class="form-control">
+              <option value="Medical">🩺 Medical (Doctor/Nurse/Paramedic)</option>
+              <option value="Logistics">📦 Logistics &amp; Distribution</option>
+              <option value="Cooking">🍲 Cooking &amp; Food Preparation</option>
+              <option value="Driving">🚐 Driving &amp; Transport</option>
+              <option value="Counselling">💬 Psychological &amp; Family Counselling</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Camp Deployment Assignment (Optional)</label>
+            <select id="vol-camp-input" class="form-control"></select>
+            <div class="form-hint">Rule enforced: Volunteers cannot be assigned to a Closed camp.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-volunteer')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Volunteer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Assign / Reassign Volunteer -->
+  <div class="modal-overlay" id="modal-assign-vol">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📍 Deploy Volunteer to Relief Camp</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-assign-vol')">&times;</button>
+      </div>
+      <form id="form-assign-volunteer">
+        <div class="modal-body">
+          <input type="hidden" id="assign-vol-id">
+          <div style="background: #f1f5f9; padding: 0.85rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-weight: 700; font-size: 1.05rem;" id="assign-vol-name">Volunteer</div>
+            <div style="font-size: 0.82rem; color: #2563eb; font-weight: 600;" id="assign-vol-skill">Skill</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Choose Deployment Camp *</label>
+            <select id="assign-vol-camp" class="form-control" required></select>
+            <div class="form-hint">Each volunteer may have only one active assignment. Closed camps are omitted.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-assign-vol')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Deployment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
